@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #1e293b;
+  --color-navy-light: #334155;
+  --color-cream: #faf7f2;
+  --color-cream-dark: #f0ebe2;
+  --color-amber: #d4a853;
+  --color-amber-light: #e8c578;
+  --color-amber-dark: #b8892e;
+
+  --font-family-display: "Playfair Display", Georgia, serif;
+  --font-family-body: "Lora", Georgia, serif;
+  --font-family-mono: "Fira Code", "Cascadia Code", "Consolas", monospace;
+}
+
+/* ─── Prayer page animations ─────────────────────────────────── */
+@keyframes prayer-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes prayer-ambient-pulse {
+  0%, 100% { opacity: 0.55; transform: translate(-50%, -42%) scale(1);    }
+  50%       { opacity: 0.85; transform: translate(-50%, -42%) scale(1.22); }
+}
+@keyframes prayer-float {
+  0%, 100% { transform: translateY(0px);  }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes prayer-success-enter {
+  from { opacity: 0; transform: scale(0.94) translateY(10px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+}
+
+.prayer-fade-up {
+  animation: prayer-fade-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.prayer-success-enter {
+  animation: prayer-success-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.prayer-icon-float {
+  display: inline-block;
+  animation: prayer-float 3.5s ease-in-out infinite;
+}
+.prayer-ambient {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -42%);
+  background: radial-gradient(
+    circle,
+    rgba(212, 168, 83, 0.18) 0%,
+    rgba(212, 168, 83, 0.06) 45%,
+    transparent 70%
+  );
+  animation: prayer-ambient-pulse 7s ease-in-out infinite;
+  pointer-events: none;
+}
+/* ──────────────────────────────────────────────────────────────── */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-family-body);
+    background-color: var(--color-cream);
+    color: var(--color-navy);
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-display);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-cream-dark);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-amber);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-amber-dark);
+  }
+}

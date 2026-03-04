@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Song {
+  id          Int      @id @default(autoincrement())
+  title       String
+  originalKey String   @map("original_key")
+  bpm         Int?
+  content     String   @db.LongText
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tags        Tag[]    @relation("SongTags")
+
+  @@map("songs")
+}
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  songs Song[] @relation("SongTags")
+
+  @@map("tags")
+}
+
+model Announcement {
+  id        Int      @id @default(autoincrement())
+  title     String
+  body      String   @db.Text
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("announcements")
+}
+
+enum PrayerType {
+  THANKSGIVING
+  REQUEST
+}
+
+model Prayer {
+  id        Int        @id @default(autoincrement())
+  type      PrayerType
+  body      String     @db.Text
+  name      String?
+  createdAt DateTime   @default(now())
+
+  @@map("prayers")
+}
