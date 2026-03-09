@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CHORD_QUALITIES, ALL_KEYS } from "../../lib/music/constants";
+import { CHORD_QUALITIES } from "../../lib/music/constants";
 
 interface ChordPickerProps {
   onSelect: (chord: string) => void;
@@ -8,7 +8,7 @@ interface ChordPickerProps {
 
 const NOTES = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
 const QUALITIES = CHORD_QUALITIES.slice(0, 12); // Show most common
-const BASS_NOTES = ["", ...NOTES];
+// const BASS_NOTES = ["", ...NOTES];
 
 export default function ChordPicker({ onSelect, onCancel }: ChordPickerProps) {
   const [root, setRoot] = useState("C");

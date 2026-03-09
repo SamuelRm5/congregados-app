@@ -4,7 +4,6 @@ import { Search, Plus, Music2 } from 'lucide-react';
 import api from '../../lib/api';
 import SongCard from '../../components/songs/SongCard';
 import Button from '../../components/ui/Button';
-import Badge from '../../components/ui/Badge';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { useDebounce } from '../../hooks/useDebounce';
 
