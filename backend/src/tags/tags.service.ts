@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Tag } from '../entities/tag.entity';
 
 @Injectable()
 export class TagsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(Tag)
+    private tagsRepository: Repository<Tag>,
+  ) {}
 
   findAll() {
-    return this.prisma.tag.findMany({ orderBy: { name: 'asc' } });
+    return this.tagsRepository.find({ order: { name: 'ASC' } });
   }
 }

@@ -1,37 +1,44 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Announcement } from '../entities/announcement.entity';
 import { CreateAnnouncementDto } from './dto/create-announcement.dto';
 
 @Injectable()
 export class AnnouncementsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(Announcement)
+    private announcementsRepository: Repository<Announcement>,
+  ) {}
 
   findAllPublic() {
-    return this.prisma.announcement.findMany({
+    return this.announcementsRepository.find({
       where: { active: true },
-      orderBy: { createdAt: 'desc' },
+      order: { createdAt: 'DESC' },
     });
   }
 
   findAll() {
-    return this.prisma.announcement.findMany({
-      orderBy: { createdAt: 'desc' },
+    return this.announcementsRepository.find({
+      order: { createdAt: 'DESC' },
     });
   }
 
-  async create(dto: CreateAnnouncementDto) {
-    return this.prisma.announcement.create({ data: dto });
+  create(dto: CreateAnnouncementDto) {
+    const announcement = this.announcementsRepository.create(dto);
+    return this.announcementsRepository.save(announcement);
   }
 
   async update(id: number, dto: Partial<CreateAnnouncementDto>) {
-    const existing = await this.prisma.announcement.findUnique({ where: { id } });
-    if (!existing) throw new NotFoundException(`Announcement #${id} not found`);
-    return this.prisma.announcement.update({ where: { id }, data: dto });
+    const announcement = await this.announcementsRepository.findOne({ where: { id } });
+    if (!announcement) throw new NotFoundException(`Announcement #${id} not found`);
+    Object.assign(announcement, dto);
+    return this.announcementsRepository.save(announcement);
   }
 
   async remove(id: number) {
-    const existing = await this.prisma.announcement.findUnique({ where: { id } });
-    if (!existing) throw new NotFoundException(`Announcement #${id} not found`);
-    return this.prisma.announcement.delete({ where: { id } });
+    const announcement = await this.announcementsRepository.findOne({ where: { id } });
+    if (!announcement) throw new NotFoundException(`Announcement #${id} not found`);
+    return this.announcementsRepository.remove(announcement);
   }
 }

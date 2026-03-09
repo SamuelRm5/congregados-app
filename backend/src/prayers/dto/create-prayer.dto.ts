@@ -5,11 +5,9 @@ import {
   IsEnum,
   MaxLength,
 } from 'class-validator';
+import { PrayerType } from '../../entities/prayer.entity';
 
-export enum PrayerType {
-  THANKSGIVING = 'THANKSGIVING',
-  REQUEST = 'REQUEST',
-}
+export { PrayerType };
 
 export class CreatePrayerDto {
   @IsEnum(PrayerType)

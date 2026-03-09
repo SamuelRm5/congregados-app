@@ -1,45 +1,48 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Song } from '../entities/song.entity';
+import { Tag } from '../entities/tag.entity';
 import { CreateSongDto } from './dto/create-song.dto';
 import { UpdateSongDto } from './dto/update-song.dto';
 import { QuerySongsDto } from './dto/query-songs.dto';
 
 @Injectable()
 export class SongsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(Song)
+    private songsRepository: Repository<Song>,
+    @InjectRepository(Tag)
+    private tagsRepository: Repository<Tag>,
+  ) {}
 
   async findAll(query: QuerySongsDto) {
     const { search, tag, page = 1, limit = 20 } = query;
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const qb = this.songsRepository
+      .createQueryBuilder('song')
+      .leftJoinAndSelect('song.tags', 'tag')
+      .orderBy('song.title', 'ASC')
+      .skip(skip)
+      .take(limit);
 
     if (search) {
-      where.title = { contains: search };
+      qb.andWhere('song.title LIKE :search', { search: `%${search}%` });
     }
 
     if (tag) {
-      where.tags = { some: { name: tag } };
+      qb.innerJoin('song.tags', 'filterTag', 'filterTag.name = :tagName', { tagName: tag });
     }
 
-    const [data, total] = await Promise.all([
-      this.prisma.song.findMany({
-        where,
-        include: { tags: true },
-        orderBy: { title: 'asc' },
-        skip,
-        take: limit,
-      }),
-      this.prisma.song.count({ where }),
-    ]);
-
+    const [data, total] = await qb.getManyAndCount();
     return { data, total, page, limit };
   }
 
   async findOne(id: number) {
-    const song = await this.prisma.song.findUnique({
+    const song = await this.songsRepository.findOne({
       where: { id },
-      include: { tags: true },
+      relations: ['tags'],
     });
 
     if (!song) {
@@ -50,49 +53,44 @@ export class SongsService {
   }
 
   async create(dto: CreateSongDto) {
-    const { tags, ...songData } = dto;
+    const { tags: tagNames, ...songData } = dto;
+    const song = this.songsRepository.create(songData);
 
-    return this.prisma.song.create({
-      data: {
-        ...songData,
-        tags: tags?.length
-          ? {
-              connectOrCreate: tags.map((name) => ({
-                where: { name },
-                create: { name },
-              })),
-            }
-          : undefined,
-      },
-      include: { tags: true },
-    });
+    if (tagNames?.length) {
+      song.tags = await this.resolveOrCreateTags(tagNames);
+    }
+
+    return this.songsRepository.save(song);
   }
 
   async update(id: number, dto: UpdateSongDto) {
-    await this.findOne(id);
+    const song = await this.findOne(id);
+    const { tags: tagNames, ...songData } = dto;
 
-    const { tags, ...songData } = dto;
+    Object.assign(song, songData);
 
-    return this.prisma.song.update({
-      where: { id },
-      data: {
-        ...songData,
-        tags: tags !== undefined
-          ? {
-              set: [],
-              connectOrCreate: tags.map((name) => ({
-                where: { name },
-                create: { name },
-              })),
-            }
-          : undefined,
-      },
-      include: { tags: true },
-    });
+    if (tagNames !== undefined) {
+      song.tags = await this.resolveOrCreateTags(tagNames);
+    }
+
+    return this.songsRepository.save(song);
   }
 
   async remove(id: number) {
-    await this.findOne(id);
-    return this.prisma.song.delete({ where: { id } });
+    const song = await this.findOne(id);
+    return this.songsRepository.remove(song);
+  }
+
+  private async resolveOrCreateTags(names: string[]): Promise<Tag[]> {
+    return Promise.all(
+      names.map(async (name) => {
+        let tag = await this.tagsRepository.findOne({ where: { name } });
+        if (!tag) {
+          tag = this.tagsRepository.create({ name });
+          await this.tagsRepository.save(tag);
+        }
+        return tag;
+      }),
+    );
   }
 }

@@ -1,20 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Prayer } from '../entities/prayer.entity';
 import { CreatePrayerDto } from './dto/create-prayer.dto';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PrayersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(Prayer)
+    private prayersRepository: Repository<Prayer>,
+  ) {}
 
   async create(dto: CreatePrayerDto) {
-    return this.prisma.prayer.create({
-      data: {
-        type: dto.type,
-        body: dto.body,
-        name: dto.name || null,
-      },
+    const prayer = this.prayersRepository.create({
+      type: dto.type,
+      body: dto.body,
+      name: dto.name ?? undefined,
     });
+    return this.prayersRepository.save(prayer);
   }
 
   async findAll(params: {
@@ -25,32 +28,33 @@ export class PrayersService {
     limit?: number;
   }) {
     const { from, to, type, page = 1, limit = 20 } = params;
-    const where: Prisma.PrayerWhereInput = {};
+
+    const qb = this.prayersRepository
+      .createQueryBuilder('prayer')
+      .orderBy('prayer.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
 
     if (type) {
-      where.type = type as Prisma.EnumPrayerTypeFilter['equals'];
+      qb.andWhere('prayer.type = :type', { type });
     }
 
-    if (from || to) {
-      where.createdAt = {};
-      if (from) where.createdAt.gte = new Date(from);
-      if (to) {
-        const toDate = new Date(to);
-        toDate.setHours(23, 59, 59, 999);
-        where.createdAt.lte = toDate;
-      }
+    if (from && to) {
+      const toDate = new Date(to);
+      toDate.setHours(23, 59, 59, 999);
+      qb.andWhere('prayer.createdAt BETWEEN :from AND :to', {
+        from: new Date(from),
+        to: toDate,
+      });
+    } else if (from) {
+      qb.andWhere('prayer.createdAt >= :from', { from: new Date(from) });
+    } else if (to) {
+      const toDate = new Date(to);
+      toDate.setHours(23, 59, 59, 999);
+      qb.andWhere('prayer.createdAt <= :to', { to: toDate });
     }
 
-    const [data, total] = await Promise.all([
-      this.prisma.prayer.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      this.prisma.prayer.count({ where }),
-    ]);
-
+    const [data, total] = await qb.getManyAndCount();
     return { data, total, page, limit };
   }
 }

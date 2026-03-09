@@ -14,9 +14,7 @@
     "build": "npm run build --workspace=shared && npm run build --workspace=frontend && npm run build --workspace=backend",
     "db:up": "docker-compose up -d",
     "db:down": "docker-compose down",
-    "db:migrate": "npm run prisma:migrate --workspace=backend",
-    "db:seed": "npm run prisma:seed --workspace=backend",
-    "db:studio": "npm run prisma:studio --workspace=backend"
+    "db:seed": "npm run typeorm:seed --workspace=backend"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
