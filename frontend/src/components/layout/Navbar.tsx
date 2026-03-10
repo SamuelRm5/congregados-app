@@ -21,7 +21,7 @@ export default function Navbar() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-1">
-            <NavLink
+            {/* <NavLink
               to="/"
               end
               className={({ isActive }) =>
@@ -41,7 +41,7 @@ export default function Navbar() {
               }
             >
               Anuncios
-            </NavLink>
+            </NavLink> */}
             <NavLink
               to="/prayers"
               className={({ isActive }) =>
