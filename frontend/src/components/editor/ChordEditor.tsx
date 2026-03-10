@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Music, ChevronDown } from 'lucide-react';
+import { FishSymbol, ChevronDown } from 'lucide-react';
 import ChordPicker from './ChordPicker';
 import SongDisplay from '../viewer/SongDisplay';
 
@@ -62,7 +62,7 @@ export default function ChordEditor({ value, onChange, originalKey }: ChordEdito
           onClick={openPicker}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-navy text-xs font-medium transition-colors"
         >
-          <Music className="w-3.5 h-3.5" />
+          <FishSymbol className="w-3.5 h-3.5" />
           Insertar acorde
         </button>
 

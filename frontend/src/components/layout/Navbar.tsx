@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, X, Music } from 'lucide-react';
+import { Menu, X, FishSymbol  } from 'lucide-react';
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,7 +12,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center group-hover:bg-amber-400 transition-colors">
-              <Music className="w-4 h-4 text-navy" />
+              <FishSymbol  className="w-4 h-4 text-navy" />
             </div>
             <span className="font-display font-semibold text-lg tracking-wide">
               Congregados

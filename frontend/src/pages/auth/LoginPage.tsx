@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { Music } from 'lucide-react';
+import { FishSymbol } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -37,7 +37,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-14 h-14 rounded-2xl bg-navy flex items-center justify-center mx-auto mb-4">
-            <Music className="w-7 h-7 text-amber-400" />
+            <FishSymbol className="w-7 h-7 text-amber-400" />
           </div>
           <h1 className="text-2xl font-display font-bold text-navy">Congregados</h1>
           <p className="text-sm text-navy/60 mt-1">Área de miembros</p>

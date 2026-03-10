@@ -1,4 +1,4 @@
-import { Music } from 'lucide-react';
+import { FishSymbol } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded bg-amber-500 flex items-center justify-center">
-            <Music className="w-3 h-3 text-navy" />
+            <FishSymbol className="w-3 h-3 text-navy" />
           </div>
           <span className="font-display text-sm text-white">Congregados</span>
         </div>

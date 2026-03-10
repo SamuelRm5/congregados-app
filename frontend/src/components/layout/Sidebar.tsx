@@ -1,5 +1,5 @@
 import { NavLink, Link } from 'react-router-dom';
-import { Music, LogOut, Home, Music2, Heart } from 'lucide-react';
+import { FishSymbol, LogOut, Home, Music2, Heart } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function Sidebar() {
@@ -11,7 +11,7 @@ export default function Sidebar() {
       <div className="px-6 py-5 border-b border-white/10">
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center">
-            <Music className="w-4 h-4 text-navy" />
+            <FishSymbol className="w-4 h-4 text-navy" />
           </div>
           <span className="font-display font-semibold tracking-wide">Congregados</span>
         </Link>

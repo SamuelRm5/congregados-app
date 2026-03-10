@@ -6,8 +6,6 @@ import ProtectedRoute from './ProtectedRoute';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 // Lazy-loaded pages
-const LandingPage = lazy(() => import('../pages/public/LandingPage'));
-const AnnouncementsPage = lazy(() => import('../pages/public/AnnouncementsPage'));
 const PrayersPage = lazy(() => import('../pages/public/PrayersPage'));
 const LoginPage = lazy(() => import('../pages/auth/LoginPage'));
 const SongsListPage = lazy(() => import('../pages/songs/SongsListPage'));
@@ -31,8 +29,7 @@ export const router = createBrowserRouter([
     path: '/',
     element: <PublicLayout />,
     children: [
-      { index: true, element: withSuspense(<LandingPage />) },
-      { path: 'announcements', element: withSuspense(<AnnouncementsPage />) },
+      { index: true, element: <Navigate to="prayers" replace /> },
       { path: 'prayers', element: withSuspense(<PrayersPage />) },
       { path: 'login', element: withSuspense(<LoginPage />) },
     ],
