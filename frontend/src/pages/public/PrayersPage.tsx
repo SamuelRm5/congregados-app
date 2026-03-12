@@ -70,7 +70,7 @@ export default function PrayersPage() {
             </h1>
             <div className="w-12 h-px bg-amber/30 mx-auto my-6" />
             <p className="text-cream/50 font-body text-base leading-relaxed mb-10 max-w-xs mx-auto">
-              Gracias por compartir tu corazón con nosotros. Estaremos orando contigo.
+              Gracias por compartir tu oración con nosotros. Estaremos orando contigo.
             </p>
             <button
               onClick={handleReset}
@@ -99,7 +99,7 @@ export default function PrayersPage() {
               Oraciones
             </h1>
             <p className="text-cream/40 font-body text-sm leading-relaxed">
-              Comparte tu corazón con la congregación
+              Comparte tu oración con la congregación
             </p>
             <div className="w-16 h-px bg-amber/25 mx-auto mt-6" />
           </div>
