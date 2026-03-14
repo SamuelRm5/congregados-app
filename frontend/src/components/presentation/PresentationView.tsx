@@ -52,18 +52,17 @@ export default function PresentationView({
 
   return (
     <div
-      className="fixed inset-0 bg-navy z-50 overflow-auto"
+      className="fixed inset-0 bg-navy z-50 overflow-y-auto overflow-x-hidden"
       onMouseMove={showControls}
     >
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-8 py-12 pb-32">
-        <div className="flex justify-between items-center">
-          <h1 className="font-display text-4xl font-bold text-white mb-2">
+      <div className="max-w-4xl mx-auto px-4 sm:px-8 py-6 sm:py-12 pb-28">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 mb-4">
+          <h1 className="font-display text-2xl sm:text-4xl font-bold text-white">
             {song.title}
           </h1>
-          <p className="text-amber-400 text-2xl font-mono ms-5">
-            Tono: {` `}
-            {transposedKey}
+          <p className="text-amber-400 text-base sm:text-2xl font-mono shrink-0">
+            Tono: {transposedKey}
             {semitones !== 0 && ` (original: ${song.originalKey})`}
           </p>
         </div>

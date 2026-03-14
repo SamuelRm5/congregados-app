@@ -49,7 +49,7 @@ export default function ChordLine({
 
   return (
     <div
-      className={`font-mono leading-snug whitespace-pre ${presentationMode ? "text-2xl" : "text-sm"}`}
+      className={`font-mono leading-snug whitespace-pre ${presentationMode ? "text-sm sm:text-lg md:text-2xl" : "text-sm"}`}
     >
       {/* Chord row */}
       <div
