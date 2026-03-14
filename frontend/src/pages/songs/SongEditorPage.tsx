@@ -107,7 +107,7 @@ export default function SongEditorPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       <Link
         to={isEdit ? `/app/songs/${id}` : '/app/songs'}
         className="inline-flex items-center gap-1.5 text-sm text-navy/60 hover:text-navy transition-colors mb-6"

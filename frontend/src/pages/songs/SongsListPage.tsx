@@ -49,11 +49,11 @@ export default function SongsListPage() {
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-start justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-display font-bold text-navy">Canciones</h1>
+          <h1 className="text-2xl sm:text-3xl font-display font-bold text-navy">Canciones</h1>
           <p className="text-navy/60 text-sm mt-0.5">
             {songs.length} canciones en el repertorio
           </p>

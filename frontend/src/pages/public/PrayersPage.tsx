@@ -153,12 +153,12 @@ export default function PrayersPage() {
                 onChange={(e) => setBody(e.target.value)}
                 placeholder="Escribe tu oración aquí..."
                 required
-                maxLength={2000}
+                maxLength={200}
                 rows={5}
                 className={`${fieldClass} resize-y leading-relaxed`}
               />
               <p className="text-cream/20 text-xs mt-2 text-right tabular-nums">
-                {body.length} / 2000
+                {body.length} / 200
               </p>
             </div>
 

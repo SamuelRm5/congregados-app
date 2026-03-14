@@ -13,7 +13,7 @@ export default function ChordEditor({ value, onChange, originalKey }: ChordEdito
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [cursorPos, setCursorPos] = useState<number | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
 
   const openPicker = () => {
     const el = textareaRef.current;
@@ -121,10 +121,14 @@ Ejemplo:
         {showPreview ? 'Ocultar' : 'Mostrar'} previsualización
       </button>
 
-      {showPreview && value && (
-        <div className="bg-white rounded-xl border border-navy/10 shadow-sm p-4 overflow-x-auto">
+      {showPreview && (
+        <div className="rounded-xl border border-navy/10 bg-cream p-4 overflow-x-auto">
           <p className="text-xs text-navy/40 mb-3 uppercase tracking-wider font-medium">Vista previa</p>
-          <SongDisplay content={value} semitones={0} originalKey={originalKey} />
+          {value ? (
+            <SongDisplay content={value} semitones={0} originalKey={originalKey} />
+          ) : (
+            <p className="text-sm text-navy/30 italic">Escribe la letra para ver la previsualización.</p>
+          )}
         </div>
       )}
     </div>

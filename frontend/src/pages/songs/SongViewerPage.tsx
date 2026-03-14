@@ -60,7 +60,7 @@ export default function SongViewerPage() {
   if (!song) return null;
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-8">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Back */}
       <Link
         to="/app/songs"
@@ -71,9 +71,9 @@ export default function SongViewerPage() {
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="flex-1 min-w-0">
-          <h1 className="text-3xl font-display font-bold text-navy leading-tight">
+          <h1 className="text-2xl sm:text-3xl font-display font-bold text-navy leading-tight">
             {song.title}
           </h1>
           <div className="flex flex-wrap items-center gap-2 mt-3">
@@ -100,7 +100,7 @@ export default function SongViewerPage() {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 sm:self-start">
           <Link to={`/app/songs/${song.id}/present`}>
             <Button variant="secondary" size="sm" title="Presentación">
               <Maximize2 className="w-4 h-4" />

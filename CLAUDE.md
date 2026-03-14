@@ -103,6 +103,15 @@ Creative, production-grade UI design guidelines. **Apply when building new pages
 - **Backgrounds:** Atmosphere and depth — gradient meshes, noise textures, layered transparencies
 - **Avoid:** Inter/Roboto/Arial, purple gradients on white, cookie-cutter layouts
 
+## Responsive Design (REQUIRED)
+
+The entire application must be fully responsive and mobile-friendly. Content is reviewed from phones.
+- **Page padding:** Always use `px-4 sm:px-6` — never `px-6` alone
+- **Headings:** Use `text-2xl sm:text-3xl` for page titles on mobile
+- **Horizontal groups:** Use `flex-col sm:flex-row` for rows that may overflow on small screens
+- **Private layout sidebar:** Collapses to a hamburger drawer on mobile (`< md`). Never assume sidebar is always visible.
+- **Mental model:** Design for 375px viewport width first
+
 ## Key Conventions
 
 - **No `any` type:** Never use `any` in TypeScript — use specific types, `unknown`, generics, or `Omit<T, K>` / `Partial<T>`. This applies to both frontend and backend.
