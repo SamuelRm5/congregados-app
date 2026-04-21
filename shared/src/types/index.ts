@@ -82,6 +82,7 @@ export interface PrayerDto {
   id: number;
   type: PrayerType;
   body: string;
+  formattedBody: string | null;
   name: string | null;
   createdAt: string;
 }

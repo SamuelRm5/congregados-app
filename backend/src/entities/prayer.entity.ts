@@ -21,6 +21,9 @@ export class Prayer {
   @Column({ type: 'text' })
   body: string;
 
+  @Column({ type: 'text', nullable: true })
+  formattedBody: string | null;
+
   @Column({ nullable: true, length: 100 })
   name: string;
 

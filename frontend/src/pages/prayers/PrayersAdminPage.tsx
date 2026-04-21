@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Heart, Calendar, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Heart,
+  Calendar,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Check,
+  Loader2,
+  AlertTriangle,
+} from 'lucide-react';
 import api from '../../lib/api';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -10,6 +20,7 @@ interface Prayer {
   id: number;
   type: 'THANKSGIVING' | 'REQUEST';
   body: string;
+  formattedBody: string | null;
   name: string | null;
   createdAt: string;
 }
@@ -35,7 +46,70 @@ const formatDate = (dateStr: string) =>
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'America/Bogota',
   }).format(new Date(dateStr));
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      title="Copiar oración formateada"
+      className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border transition-all duration-200 ${
+        copied
+          ? 'bg-green-50 border-green-300 text-green-700'
+          : 'bg-white border-navy/20 text-navy/60 hover:border-amber hover:text-amber'
+      }`}
+    >
+      {copied ? (
+        <>
+          <Check className="w-3.5 h-3.5" />
+          Copiado
+        </>
+      ) : (
+        <>
+          <Copy className="w-3.5 h-3.5" />
+          Copiar
+        </>
+      )}
+    </button>
+  );
+}
+
+function FormattedBody({ formattedBody }: { formattedBody: string | null }) {
+  if (formattedBody === null) {
+    return (
+      <div className="flex items-center gap-2 text-navy/40 text-sm italic">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        Procesando con IA...
+      </div>
+    );
+  }
+
+  if (formattedBody === 'SIN COHERENCIA') {
+    return (
+      <div className="flex items-center gap-2 text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-sm">
+        <AlertTriangle className="w-4 h-4 shrink-0" />
+        <span className="font-medium">Sin coherencia — revisar oración original</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <p className="text-navy leading-relaxed flex-1">{formattedBody}</p>
+      <CopyButton text={formattedBody} />
+    </div>
+  );
+}
 
 export default function PrayersAdminPage() {
   const [prayers, setPrayers] = useState<Prayer[]>([]);
@@ -81,7 +155,7 @@ export default function PrayersAdminPage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-display font-bold text-navy">Oraciones</h1>
+        <h1 className="text-2xl sm:text-3xl font-display font-bold text-navy">Oraciones</h1>
         <p className="text-navy/50 text-sm mt-1">
           {total} oración{total !== 1 ? 'es' : ''} recibida{total !== 1 ? 's' : ''}
         </p>
@@ -157,7 +231,8 @@ export default function PrayersAdminPage() {
           <div className="space-y-4">
             {prayers.map((prayer) => (
               <Card key={prayer.id} className="p-5">
-                <div className="flex items-center justify-between mb-3">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-4">
                   <Badge variant={prayer.type === 'THANKSGIVING' ? 'amber' : 'default'}>
                     {TYPE_LABELS[prayer.type]}
                   </Badge>
@@ -166,12 +241,20 @@ export default function PrayersAdminPage() {
                     {formatDate(prayer.createdAt)}
                   </div>
                 </div>
-                <p className="text-navy/80 leading-relaxed whitespace-pre-wrap">
-                  {prayer.body}
-                </p>
-                {prayer.name && (
-                  <p className="mt-3 text-sm text-navy/45 italic">— {prayer.name}</p>
-                )}
+
+                {/* Formatted body */}
+                <FormattedBody formattedBody={prayer.formattedBody} />
+
+                {/* Divider + original */}
+                <div className="mt-4 pt-3 border-t border-navy/8">
+                  <p className="text-xs text-navy/40 mb-1">Original</p>
+                  <p className="text-sm text-navy/55 leading-relaxed whitespace-pre-wrap">
+                    {prayer.body}
+                  </p>
+                  {prayer.name && (
+                    <p className="mt-2 text-xs text-navy/40 italic">— {prayer.name}</p>
+                  )}
+                </div>
               </Card>
             ))}
           </div>

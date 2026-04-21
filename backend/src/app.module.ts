@@ -25,7 +25,7 @@ import { Prayer } from './entities/prayer.entity';
         type: 'mysql',
         url: configService.get<string>('DATABASE_URL'),
         entities: [User, Song, Tag, Announcement, Prayer],
-        synchronize: true,
+        synchronize: configService.get<string>('NODE_ENV') !== 'production',
       }),
     }),
     AuthModule,
