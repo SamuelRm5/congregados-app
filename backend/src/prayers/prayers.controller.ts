@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
   Post,
   Query,
   UseGuards,
@@ -20,6 +22,12 @@ export class PrayersController {
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   create(@Body() dto: CreatePrayerDto) {
     return this.prayersService.create(dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/format')
+  format(@Param('id', ParseIntPipe) id: number) {
+    return this.prayersService.formatById(id);
   }
 
   @UseGuards(JwtAuthGuard)

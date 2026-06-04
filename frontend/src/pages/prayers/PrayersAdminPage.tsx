@@ -9,7 +9,9 @@ import {
   Check,
   Loader2,
   AlertTriangle,
+  Sparkles,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '../../lib/api';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -84,17 +86,57 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-function FormattedBody({ formattedBody }: { formattedBody: string | null }) {
-  if (formattedBody === null) {
-    return (
-      <div className="flex items-center gap-2 text-navy/40 text-sm italic">
-        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        Procesando con IA...
-      </div>
-    );
+function FormatButton({
+  id,
+  onFormatted,
+}: {
+  id: number;
+  onFormatted: (prayer: Prayer) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  const handleFormat = () => {
+    setLoading(true);
+    api
+      .post<Prayer>(`/prayers/${id}/format`)
+      .then((r) => onFormatted(r.data))
+      .catch(() => toast.error('No se pudo formatear la oración'))
+      .finally(() => setLoading(false));
+  };
+
+  return (
+    <button
+      onClick={handleFormat}
+      disabled={loading}
+      className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border bg-white border-amber/40 text-amber hover:bg-amber/5 transition-all duration-200 disabled:opacity-60"
+    >
+      {loading ? (
+        <>
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          Formateando...
+        </>
+      ) : (
+        <>
+          <Sparkles className="w-3.5 h-3.5" />
+          Formatear
+        </>
+      )}
+    </button>
+  );
+}
+
+function FormattedBody({
+  prayer,
+  onFormatted,
+}: {
+  prayer: Prayer;
+  onFormatted: (prayer: Prayer) => void;
+}) {
+  if (prayer.formattedBody === null) {
+    return <FormatButton id={prayer.id} onFormatted={onFormatted} />;
   }
 
-  if (formattedBody === 'SIN COHERENCIA') {
+  if (prayer.formattedBody === 'SIN COHERENCIA') {
     return (
       <div className="flex items-center gap-2 text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-sm">
         <AlertTriangle className="w-4 h-4 shrink-0" />
@@ -105,8 +147,8 @@ function FormattedBody({ formattedBody }: { formattedBody: string | null }) {
 
   return (
     <div className="flex items-start justify-between gap-3">
-      <p className="text-navy leading-relaxed flex-1">{formattedBody}</p>
-      <CopyButton text={formattedBody} />
+      <p className="text-navy leading-relaxed flex-1">{prayer.formattedBody}</p>
+      <CopyButton text={prayer.formattedBody} />
     </div>
   );
 }
@@ -140,6 +182,12 @@ export default function PrayersAdminPage() {
   useEffect(() => {
     fetchPrayers();
   }, [fetchPrayers]);
+
+  const handleFormatted = useCallback((updated: Prayer) => {
+    setPrayers((prev) =>
+      prev.map((p) => (p.id === updated.id ? updated : p)),
+    );
+  }, []);
 
   const totalPages = Math.ceil(total / LIMIT);
   const hasFilters = from || to || typeFilter;
@@ -243,7 +291,7 @@ export default function PrayersAdminPage() {
                 </div>
 
                 {/* Formatted body */}
-                <FormattedBody formattedBody={prayer.formattedBody} />
+                <FormattedBody prayer={prayer} onFormatted={handleFormatted} />
 
                 {/* Divider + original */}
                 <div className="mt-4 pt-3 border-t border-navy/8">

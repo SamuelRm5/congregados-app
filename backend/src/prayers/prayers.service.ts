@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -35,8 +35,33 @@ export class PrayersService {
       name: dto.name ?? undefined,
     });
     const saved = await this.prayersRepository.save(prayer);
-    this.formatWithAi(saved.id, saved.body, dto.type, dto.name ?? null);
+    // Formateo en segundo plano: no bloquea la respuesta. Los errores ya
+    // quedan registrados dentro de formatWithAi; aquí solo evitamos el
+    // unhandled rejection. Si falla, queda formattedBody = null y el admin
+    // puede reintentarlo manualmente con el botón "Formatear".
+    void this.formatWithAi(
+      saved.id,
+      saved.body,
+      dto.type,
+      dto.name ?? null,
+    ).catch(() => undefined);
     return saved;
+  }
+
+  // Formatea una oración existente bajo demanda (botón "Formatear" del admin).
+  // Propaga el error al controlador para que el front pueda avisar al usuario.
+  async formatById(id: number): Promise<Prayer> {
+    const prayer = await this.prayersRepository.findOne({ where: { id } });
+    if (!prayer) {
+      throw new NotFoundException(`Oración ${id} no encontrada`);
+    }
+    await this.formatWithAi(
+      prayer.id,
+      prayer.body,
+      prayer.type,
+      prayer.name ?? null,
+    );
+    return this.prayersRepository.findOneByOrFail({ id });
   }
 
   private async formatWithAi(
@@ -45,53 +70,61 @@ export class PrayersService {
     type: string,
     name: string | null,
   ): Promise<void> {
-    try {
-      const apiKey = this.configService.get<string>('AI_GATEWAY_API_KEY');
-      if (!apiKey) {
-        this.logger.warn(`[Prayer ${id}] AI_GATEWAY_API_KEY no configurada`);
-        return;
-      }
+    const apiKey = this.configService.get<string>('AI_GATEWAY_API_KEY');
+    if (!apiKey) {
+      this.logger.error(`[Prayer ${id}] AI_GATEWAY_API_KEY no configurada`);
+      throw new Error('AI_GATEWAY_API_KEY no configurada');
+    }
 
-      const tipoTexto = type === 'THANKSGIVING' ? 'da gracias' : 'pide por';
+    try {
+      const tipoTexto =
+        type === 'THANKSGIVING' ? 'da gracias porque' : 'pide orar para que';
 
       const prompt = name
-        ? `Eres un asistente de una iglesia que formatea peticiones y agradecimientos de oración.
+        ? `Eres un asistente de una iglesia. Reformulas peticiones y agradecimientos para mostrarlos en pantalla: alguien los lee en voz alta y al leerlos ya está orando por esa persona.
 
-El remitente se llama "${name}" y su tipo de oración es "${tipoTexto}".
+El remitente se llama "${name}".
 
 Reglas:
-- Comienza siempre con "${name} ${tipoTexto}" seguido de lo que dice la oración.
-- Si el nombre "${name}" aparece al inicio del texto de la oración, ignóralo para evitar redundancia.
-- Corrige ortografía, puntuación y redacción. Mantén todos los datos, nombres y peticiones importantes.
-- Sé conciso pero sin omitir nada relevante.
+- Devuelve UNA sola frase que empiece con "${name} ${tipoTexto}" seguida de lo esencial (ej: "${name} ${tipoTexto} Dios bendiga a su familia y sane a su hijo").
+- Lenguaje sencillo, directo y natural. NADA de adornos.
+- NO agregues frases de cierre, exhortaciones ni invitaciones (prohibido: "unámonos en gratitud", "invitándonos a...", "oremos juntos", "que el Señor...", "pidamos por...").
+- NO agregues nada que el remitente no haya dicho.
+- Elimina las peticiones de oración explícitas o redundantes (ej: "por favor oren por ella", "les pido sus oraciones"): sobran.
+- Si el nombre "${name}" aparece al inicio del texto, ignóralo para no repetirlo.
+- Corrige ortografía, puntuación y redacción, conservando datos y nombres importantes.
 - Si el texto es completamente incoherente e incomprensible, responde únicamente con: SIN COHERENCIA
-- Responde ÚNICAMENTE con el texto formateado, sin comillas ni explicaciones.
+- Responde ÚNICAMENTE con la frase, sin comillas ni explicaciones.
 
 Oración: "${body}"`
-        : `Eres un asistente de una iglesia que formatea peticiones y agradecimientos de oración.
+        : `Eres un asistente de una iglesia. Reformulas peticiones y agradecimientos para mostrarlos en pantalla: alguien los lee en voz alta y al leerlos ya está orando por esa persona.
 
 No se proporcionó nombre del remitente.
 
 Reglas:
-- Si el texto comienza con un nombre propio seguido de un verbo (ej: "Carlos pide", "Viviana agradece"), conserva esa estructura y solo corrige ortografía y redacción.
-- Si no hay nombre, corrige ortografía, puntuación y redacción manteniendo todos los datos importantes.
-- Sé conciso pero sin omitir nada relevante.
+- Devuelve UNA sola frase. Si el texto empieza con un nombre propio y un verbo (ej: "Carlos pide...", "Viviana da gracias..."), consérvalo; si no, redacta en tercera persona ("Se pide orar para que...").
+- Lenguaje sencillo, directo y natural. NADA de adornos.
+- NO agregues frases de cierre, exhortaciones ni invitaciones (prohibido: "unámonos en gratitud", "invitándonos a...", "oremos juntos", "que el Señor...").
+- NO agregues nada que el remitente no haya dicho.
+- Elimina las peticiones de oración explícitas o redundantes (ej: "por favor oren por ella", "les pido sus oraciones"): sobran.
+- Corrige ortografía, puntuación y redacción, conservando datos importantes.
 - Si el texto es completamente incoherente e incomprensible, responde únicamente con: SIN COHERENCIA
-- Responde ÚNICAMENTE con el texto formateado, sin comillas ni explicaciones.
+- Responde ÚNICAMENTE con la frase, sin comillas ni explicaciones.
 
 Oración: "${body}"`;
 
-      const { text } = await generateText({
-        model: 'google/gemma-4-31b-it',
-        prompt,
-      });
+      const model = 'google/gemini-3.1-flash-lite';
+      const { text } = await generateText({ model, prompt });
       await this.prayersRepository.update(id, { formattedBody: text.trim() });
       this.logger.log(`[Prayer ${id}] Formateada correctamente`);
     } catch (err) {
       this.logger.error(
-        `[Prayer ${id}] Error al formatear con IA`,
-        err instanceof Error ? err.stack : String(err),
+        `[Prayer ${id}] Error al formatear con IA: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+        err instanceof Error ? err.stack : undefined,
       );
+      throw err;
     }
   }
 
