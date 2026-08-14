@@ -10,6 +10,7 @@ import {
   Loader2,
   AlertTriangle,
   Sparkles,
+  Presentation,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../lib/api';
@@ -17,6 +18,7 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import { generatePrayersPptx } from '../../lib/exportPrayersToPptx';
 
 interface Prayer {
   id: number;
@@ -158,6 +160,7 @@ export default function PrayersAdminPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -189,6 +192,50 @@ export default function PrayersAdminPage() {
     );
   }, []);
 
+  const handleExportPptx = async () => {
+    if (total === 0) {
+      toast.error('No hay oraciones para exportar');
+      return;
+    }
+
+    setExporting(true);
+    const toastId = toast.loading('Generando presentación de PowerPoint...');
+
+    try {
+      // Fetch all prayers matching current filters (limit = 1000 to get everything in one request)
+      const params: Record<string, string | number> = { page: 1, limit: 1000 };
+      if (from) params.from = from;
+      if (to) params.to = to;
+      if (typeFilter) params.type = typeFilter;
+
+      const res = await api.get<PrayersResponse>('/prayers', { params });
+      const allMatchingPrayers = res.data.data;
+
+      if (allMatchingPrayers.length === 0) {
+        toast.dismiss(toastId);
+        toast.error('No se encontraron oraciones con los filtros actuales');
+        setExporting(false);
+        return;
+      }
+
+      let subtitleDesc = '';
+      if (typeFilter === 'REQUEST') subtitleDesc = 'Peticiones';
+      else if (typeFilter === 'THANKSGIVING') subtitleDesc = 'Agradecimientos';
+      if (from && to) subtitleDesc += subtitleDesc ? ` (${from} a ${to})` : `${from} a ${to}`;
+
+      await generatePrayersPptx(allMatchingPrayers, subtitleDesc);
+
+      toast.dismiss(toastId);
+      toast.success('¡Presentación de PowerPoint generada con éxito!');
+    } catch (err) {
+      console.error(err);
+      toast.dismiss(toastId);
+      toast.error('Error al generar la presentación de PowerPoint');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const totalPages = Math.ceil(total / LIMIT);
   const hasFilters = from || to || typeFilter;
 
@@ -202,11 +249,30 @@ export default function PrayersAdminPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-display font-bold text-navy">Oraciones</h1>
-        <p className="text-navy/50 text-sm mt-1">
-          {total} oración{total !== 1 ? 'es' : ''} recibida{total !== 1 ? 's' : ''}
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-display font-bold text-navy">Oraciones</h1>
+          <p className="text-navy/50 text-sm mt-1">
+            {total} oración{total !== 1 ? 'es' : ''} recibida{total !== 1 ? 's' : ''}
+          </p>
+        </div>
+        <Button
+          onClick={handleExportPptx}
+          disabled={exporting || total === 0}
+          className="flex items-center gap-2 bg-amber hover:bg-amber-light text-navy font-medium shadow-sm"
+        >
+          {exporting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Generando PPTX...
+            </>
+          ) : (
+            <>
+              <Presentation className="w-4 h-4" />
+              Generar PowerPoint
+            </>
+          )}
+        </Button>
       </div>
 
       {/* Filters */}
