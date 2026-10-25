@@ -1,7 +1,14 @@
 import { useRef, useState } from "react";
-import { Plus, Send, X } from "lucide-react";
+import { CalendarDays, MapPin, Plus, Send, X } from "lucide-react";
 import api from "../../lib/api";
 import { toast } from "sonner";
+
+const EVENT = {
+  date: "Jueves 5 de noviembre",
+  place: "Montenegro, Quindío",
+  address: "Barrio Comuneros, Mz 8 Casa 27 · El Crucero vía al Parque del Café",
+  mapsUrl: "https://maps.app.goo.gl/oBVD3Qn7MQeqQSoo8",
+};
 
 interface Participant {
   id: number;
@@ -105,6 +112,41 @@ export default function BaptismRegistrationPage() {
                 Escribe el nombre de cada persona que va a asistir
               </p>
               <div className="w-16 h-px bg-amber/30 mx-auto mt-6" />
+            </div>
+
+            <div
+              className="mb-10 rounded-2xl border border-navy/10 bg-white/60 divide-y divide-navy/10 prayer-fade-up"
+              style={{ animationDelay: "40ms" }}
+            >
+              <div className="flex items-center gap-4 px-5 py-4">
+                <CalendarDays className="w-5 h-5 text-amber shrink-0" />
+                <div>
+                  <p className="text-navy/40 text-xs tracking-widest uppercase">
+                    Fecha
+                  </p>
+                  <p className="text-navy font-body">{EVENT.date}</p>
+                </div>
+              </div>
+              <a
+                href={EVENT.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-4 px-5 py-4 group"
+              >
+                <MapPin className="w-5 h-5 text-amber shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-navy/40 text-xs tracking-widest uppercase">
+                    Ubicación
+                  </p>
+                  <p className="text-navy font-body">{EVENT.place}</p>
+                  <p className="text-navy/50 text-sm font-body">
+                    {EVENT.address}
+                  </p>
+                </div>
+                <span className="text-amber/80 group-hover:text-amber text-xs tracking-widest uppercase shrink-0 transition-colors">
+                  Mapa →
+                </span>
+              </a>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">
