@@ -7,6 +7,9 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 // Lazy-loaded pages
 const PrayersPage = lazy(() => import('../pages/public/PrayersPage'));
+const BaptismRegistrationPage = lazy(
+  () => import('../pages/public/BaptismRegistrationPage'),
+);
 const LoginPage = lazy(() => import('../pages/auth/LoginPage'));
 const SongsListPage = lazy(() => import('../pages/songs/SongsListPage'));
 const SongViewerPage = lazy(() => import('../pages/songs/SongViewerPage'));
@@ -34,6 +37,8 @@ export const router = createBrowserRouter([
       { path: 'login', element: withSuspense(<LoginPage />) },
     ],
   },
+  // Solo se accede por enlace directo: va fuera de PublicLayout para no mostrar navegación
+  { path: '/baptisms', element: withSuspense(<BaptismRegistrationPage />) },
   {
     path: '/app',
     element: (

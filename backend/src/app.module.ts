@@ -8,11 +8,14 @@ import { SongsModule } from './songs/songs.module';
 import { TagsModule } from './tags/tags.module';
 import { AnnouncementsModule } from './announcements/announcements.module';
 import { PrayersModule } from './prayers/prayers.module';
+import { BaptismsModule } from './baptisms/baptisms.module';
 import { User } from './entities/user.entity';
 import { Song } from './entities/song.entity';
 import { Tag } from './entities/tag.entity';
 import { Announcement } from './entities/announcement.entity';
 import { Prayer } from './entities/prayer.entity';
+import { BaptismRegistration } from './entities/baptism-registration.entity';
+import { BaptismParticipant } from './entities/baptism-participant.entity';
 
 @Module({
   imports: [
@@ -24,7 +27,15 @@ import { Prayer } from './entities/prayer.entity';
       useFactory: (configService: ConfigService) => ({
         type: 'mysql',
         url: configService.get<string>('DATABASE_URL'),
-        entities: [User, Song, Tag, Announcement, Prayer],
+        entities: [
+          User,
+          Song,
+          Tag,
+          Announcement,
+          Prayer,
+          BaptismRegistration,
+          BaptismParticipant,
+        ],
         synchronize: configService.get<string>('NODE_ENV') !== 'production',
       }),
     }),
@@ -34,6 +45,7 @@ import { Prayer } from './entities/prayer.entity';
     TagsModule,
     AnnouncementsModule,
     PrayersModule,
+    BaptismsModule,
   ],
 })
 export class AppModule {}

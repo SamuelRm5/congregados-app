@@ -92,3 +92,12 @@ export interface CreatePrayerDto {
   body: string;
   name?: string;
 }
+
+export interface CreateBaptismRegistrationDto {
+  participants: string[];
+}
+
+export interface BaptismRegistrationResponse {
+  id: number;
+  count: number;
+}
