@@ -4,7 +4,7 @@ import api from "../../lib/api";
 import { toast } from "sonner";
 
 const EVENT = {
-  date: "Jueves 5 de noviembre",
+  date: "Sábado 7 de noviembre",
   place: "Montenegro, Quindío",
   address: "Barrio Comuneros, Mz 8 Casa 27 · El Crucero vía al Parque del Café",
   mapsUrl: "https://maps.app.goo.gl/oBVD3Qn7MQeqQSoo8",
